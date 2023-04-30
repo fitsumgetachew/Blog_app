@@ -4,4 +4,5 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return "<h1>hello, Fitsum!</h1>"
+    #make the server publicly by adding --host=0.0.0.0
+    return "<h1>Runing publicly</h1>"
