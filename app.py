@@ -4,5 +4,5 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    #make the server publicly by adding --host=0.0.0.0
-    return "<h1>Runing publicly</h1>"
+    #running with debug mode on by giving some error by ading  --debug
+    return "<h1>Running with debug on </h1>" + name
