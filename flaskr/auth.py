@@ -8,7 +8,7 @@ from flaskr.db import get_db
 
 bp = Blueprint('auth' , __name__ , url_prefix='/auth')
 
-@bp.route('/register' , method = ('GET' , 'POST'))
+@bp.route('/register' , methods = ('GET' , 'POST'))
 def register():
 
     if request.method == 'POST':
@@ -24,8 +24,8 @@ def register():
 
         if error is None:
             try:
-                db.excute(
-                    "INSERT INTO user(username , password)  VALUES ()" ,
+                db.execute(
+                    "INSERT INTO user(username , password)  VALUES (? , ?)" ,
                     (username , generate_password_hash(password))
                 )
                 db.commit()
