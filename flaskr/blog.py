@@ -10,7 +10,7 @@ bp = Blueprint('blog' , __name__)
 @bp.route('/')
 def index():
     db = get_db()
-    posts = db.excute(
+    posts = db.execute(
         'SELECT p.id, title, body, created, author_id, username'
         ' FROM post p JOIN user u ON p.author_id = u.id'
         ' ORDER BY created DESC'
@@ -49,6 +49,7 @@ def get_post(id , check_author = True):
         ' WHERE p.id = ?',
         (id,)
     ).fetchone()
+    #id = id -1
 
     if post is None:
         abort(404 , f"post id {id} doesn't exist. ")
@@ -73,9 +74,18 @@ def update(id):
             flash(error)
         else:
             db = get_db()
-            db.excute(
+            db.execute(
                 'UPDATE  post SET title = ? , body = ? WHERE id = ?' , (title , body , id)
             )
             db.commit()
             return redirect(url_for('blog.index'))
     return render_template('blog/update.html', post = post)
+
+@bp.route('/<int:id>/delete', methods=('POST',))
+@login_required
+def delete(id):
+    get_post(id)
+    db = get_db()
+    db.execute('DELETE FROM post WHERE id = ?', (id,))
+    db.commit()
+    return redirect(url_for('blog.index'))
