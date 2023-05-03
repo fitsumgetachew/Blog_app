@@ -49,11 +49,11 @@ def get_post(id , check_author = True):
         ' WHERE p.id = ?',
         (id,)
     ).fetchone()
-    #id = id -1
-
     if post is None:
         abort(404 , f"post id {id} doesn't exist. ")
-    if check_author and post['author_id'] != g.user[id]:
+
+
+    if check_author and post['author_id'] != g.user['id']:
         abort(403)
 
     return  post

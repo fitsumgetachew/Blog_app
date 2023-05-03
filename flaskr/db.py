@@ -23,8 +23,25 @@ def init_db(app):
 
     with app.app_context():
         db = get_db()
-        with current_app.open_resource('schema.sql') as f:
-            db.executescript(f.read().decode('utf8'))
+        result = db.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='user';"
+        ).fetchone()
+
+        if result is None:
+            with current_app.open_resource('schema.sql') as f:
+                db.executescript(f.read().decode('utf8'))
+        else:
+            pass
+
+        result = db.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='post';"
+        ).fetchone()
+
+        if result is None:
+            with current_app.open_resource('schema.sql') as f:
+                db.executescript(f.read().decode('utf8'))
+        else:
+            pass
 
 
 @click.command('init-db')
