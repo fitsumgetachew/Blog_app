@@ -48,6 +48,7 @@ def login():
         password = request.form['password']
         db = get_db()
         error = None
+        db = db.cursor()
 
         user = db.execute(
             'SELECT * FROM  user WHERE username = ?' , (username , )
@@ -73,7 +74,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user =None
     else:
-        g.user = get_db().execute(
+        g.user = get_db().cursor().execute(
             'SELECT * FROM user WHERE  id = ?' , (user_id ,)
         ).fetchone()
 
