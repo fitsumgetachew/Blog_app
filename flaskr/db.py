@@ -2,7 +2,7 @@ import sqlite3
 import click
 from flask.cli import with_appcontext
 from flask import  current_app , g
-import mysql.connector
+import MySQLdb
 
 def get_db():
     if 'db' not in g:
@@ -11,13 +11,13 @@ def get_db():
         #             detect_types=sqlite3.PARSE_DECLTYPES
         # )
         # g.db.row_factory =sqlite3.Row
-        g.db = mysql.connector.connect(
-            host='localhost' ,
-            user='root',
-            database='flaskr',
-            password = 'fitsum_new'
+        g.db = MySQLdb.connect(
+            host = current_app.config['MYSQL_HOST'],
+            user = current_app.config['MYSQL_USER'] ,
+            password = current_app.config['MYSQL_PASSWORD'],
+            database = current_app.config['MYSQL_DB']
         )
-        g.db.row_factor = mysql.connector.Row
+
 
     return g.db
 
@@ -51,24 +51,21 @@ def init_db(app):
         # else:
         #     pass
         cursor = db.cursor()
-        cursor.execute(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'user'"
-        )
-        result = cursor.fetchone()[0]
+        cursor.execute("SHOW TABLES LIKE 'user'")
+        result = cursor.fetchone()
+
         if not result:
             with current_app.open_resource('schema.sql') as f:
                 cursor.execute(f.read().decode('utf8'))
+            db.commit()
 
-        cursor.execute(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'post'"
-        )
-        result = cursor.fetchone()[0]
+        cursor.execute("SHOW TABLES LIKE 'post'")
+        result = cursor.fetchone()
+
         if not result:
             with current_app.open_resource('schema.sql') as f:
                 cursor.execute(f.read().decode('utf8'))
-
-        cursor.close()
-
+            db.commit()
 
 
 @click.command('init-db')

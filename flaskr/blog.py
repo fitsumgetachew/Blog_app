@@ -3,19 +3,29 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 from flaskr.auth import login_required
-from flaskr.db import get_db
+from flaskr import mydb
 
 bp = Blueprint('blog' , __name__)
 
 @bp.route('/')
 def index():
-    db = get_db()
-    db = db.cursor()
-    posts = db.execute(
-        'SELECT p.id, title, body, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
-        ' ORDER BY created DESC'
-    ).fetchall()
+    # db = get_db()
+    cursor = mydb.cursor()
+    #cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) FROM post")
+    count = cursor.fetchone()[0]
+    cursor.close()
+    cursor = mydb.cursor(dictionary=True)
+    if count > 0:
+        cursor.execute(
+            'SELECT p.id, title, body, created, author_id, username'
+            ' FROM post p JOIN user u ON p.author_id = u.id'
+            ' ORDER BY created DESC'
+        )
+        posts = cursor.fetchall()
+    else:
+        posts = []
+    cursor.close()
 
     return render_template('blog/index.html' , posts = posts)
 
@@ -33,30 +43,45 @@ def create():
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            db = db.cursor()
-            db.execute(
-                'INSERT INTO post (title, body, author_id)'
-                ' VALUES (?, ?, ?)',
+            #db = get_db()
+
+            cursor = mydb.cursor()
+            cursor.execute(
+                'INSERT INTO post (title, body, author_id)VALUES (%s, %s, %s)',
                 (title, body, g.user['id'])
             )
-            db.commit()
+            mydb.commit()
+            cursor.close()
         return redirect(url_for('blog.index'))
     return render_template('blog/create.html')
 
 def get_post(id , check_author = True):
-    post = get_db().cursor().execute(
-        'SELECT p.id, title, body, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
-        ' WHERE p.id = ?',
-        (id,)
-    ).fetchone()
-    if post is None:
+    #db  = get_db()
+    cursor = mydb.cursor()
+    cursor.execute("SELECT COUNT(*) FROM post ")
+    count = cursor.fetchone()[0]
+    cursor.close()
+    if count > 0:
+        cursor = mydb.cursor(dictionary=True)
+
+        cursor.execute(
+            'SELECT p.id, title, body, created, author_id, username'
+            ' FROM post p JOIN user u ON p.author_id = u.id'
+            ' WHERE p.id = %s',
+            (id,)
+        )
+        post = cursor.fetchone()
+    else:
+        pass
+        post = []
+
+    if post is None :
         abort(404 , f"post id {id} doesn't exist. ")
 
 
     if check_author and post['author_id'] != g.user['id']:
         abort(403)
+    cursor.close()
 
     return  post
 
@@ -75,12 +100,13 @@ def update(id):
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            db = db.cursor()
-            db.execute(
-                'UPDATE  post SET title = ? , body = ? WHERE id = ?' , (title , body , id)
+            #db = get_db()
+            cursor = mydb.cursor()
+            cursor.execute(
+                'UPDATE  post SET title =%s , body = %s WHERE id = %s' , (title , body , id)
             )
-            db.commit()
+            mydb.commit()
+            cursor.close()
             return redirect(url_for('blog.index'))
     return render_template('blog/update.html', post = post)
 
@@ -88,8 +114,9 @@ def update(id):
 @login_required
 def delete(id):
     get_post(id)
-    db = get_db()
-    db= db.cursor()
-    db.execute('DELETE FROM post WHERE id = ?', (id,))
-    db.commit()
+    #db = get_db()
+    cursor= mydb.cursor()
+    cursor.execute('DELETE FROM post WHERE id = %s', (id,))
+    mydb.commit()
+    cursor.close()
     return redirect(url_for('blog.index'))

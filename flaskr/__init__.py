@@ -1,13 +1,33 @@
 import os
 from flask import Flask
+from flask_mysqldb import MySQL
+import mysql.connector
+
+try :
+    mydb = mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='fitsum_new',
+        database = 'flaskr'
+    )
+    print("connection successful")
+
+except:
+    print("some error")
+
 
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE='mysql://root:fitsum_new@localhost/flaskr',
-    )
+         SECRET_KEY='dev')
+    #     DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+    # )
+    # app.config['MYSQL_HOST'] = 'localhost'
+    # app.config['MYSQL_USER'] = 'root'
+    # app.config['MYSQL_PASSWORD'] = 'fitsum_new'
+    # app.config['MYSQL_DB'] = 'flaskr'
+    # mysql = MySQL(app)
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
@@ -18,10 +38,10 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-    from . import db
-    db.init_app(app)
-
-    db.init_db(app)
+    # from . import db
+    # db.init_app(app)
+    #
+    # db.init_db(app)
 
     from . import auth
     app.register_blueprint(auth.bp)
