@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1> {% block title %} Send Message {% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<form method = "POST">
+    <label for = "name-select">Select a user name </label>
+    <select id="name-select" name="name-select">
+        {% for name in listUsername %}
+        <option value="{{ name[0] }}">{{ name[0] }}</option>
+        {% endfor %}
+    </select>
+    <label for="comment">Comment :</label>
+    <textarea id="comment" name="comment"></textarea>
+    <button type="submit" >Send</button>
+</form>
+
+{% endblock %}
+
