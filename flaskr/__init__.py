@@ -41,19 +41,20 @@ class User(UserMixin):
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-         SECRET_KEY='dev')
-    app.config['TESTING'] = False
-    app.config.update(
-        SECRET_KEY ='fitsum' ,
-        TESTING = True ,
-        DEBUG = True,
-        PROPAGATE_EXCEPTIONS = True,
-        TRAP_HTTP_EXCEPTIONS = True ,
-        TRAP_BAD_REQUEST_ERRORS = True
-    )
-    app.config['PERMANENT_SESSION_LIFETIME'] = 5
-    app.config['REMEMBER_COOKIE_DURATION']   = 60
+    app.config.from_object('config')
+    # app.config.from_mapping(
+    #      SECRET_KEY='dev')
+    # app.config['TESTING'] = False
+    # app.config.update(
+    #     SECRET_KEY ='fitsum' ,
+    #     TESTING = True ,
+    #     DEBUG = True,
+    #     PROPAGATE_EXCEPTIONS = True,
+    #     TRAP_HTTP_EXCEPTIONS = True ,
+    #     TRAP_BAD_REQUEST_ERRORS = True
+    # )
+    # app.config['PERMANENT_SESSION_LIFETIME'] = 5
+    # app.config['REMEMBER_COOKIE_DURATION']   = 60
     login_manager = LoginManager(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
