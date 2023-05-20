@@ -5,8 +5,8 @@
 <nav>
     <h1>Flaskr</h1>
     <ul>
-        {% if g.user %}
-    <li><span>{{ g.user['username'] }}</span></li>
+        {% if current_user.is_authenticated %}
+    <li><span>{{ current_user.username }}</span></li>
         <li><a href="{{ url_for('auth.logout') }}" >Log Out</a></li>
         <li><a href="{{ url_for('comment.inbox') }}" >Inbox</a></li>
         <li><a href="{{ url_for('comment.send') }}" >Send Comment</a></li>

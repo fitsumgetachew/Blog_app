@@ -9,7 +9,7 @@ def login():
                        request.form['password']):
             return request.form['username']
         else:
-            error = 'Invalid username/password'
+            error = 'Invald username/password'
     # the code below is executed if the request method
     # was GET or the credentials were invalid
-    return render_template('login.html', error=error)
+    return render_template('login.html', name=error)

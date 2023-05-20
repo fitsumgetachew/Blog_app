@@ -2,6 +2,8 @@ import os
 from flask import Flask
 from flask_mysqldb import MySQL
 import mysql.connector
+from flask_login import LoginManager  , UserMixin , current_user
+
 
 try :
     mydb = mysql.connector.connect(
@@ -15,19 +17,61 @@ try :
 except:
     print("some error")
 
+class User(UserMixin):
+    def __init__(self , id , username):
+        self.id = id
+        self.username = username
 
+    def is_authenticated(self):
+        # cursor = mydb.cursor(dictionary=True)
+        # cursor.execute('SELECT * FROM user WHERE id= %s' , (self.id , ))
+        # user = cursor.fetchone()
+        # cursor.close()
+        #
+        # if user:
+        #     return user['username']
+        # else:
+        #     return False
+        return True
+
+
+    @property
+    def is_active(self):
+        return True
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
          SECRET_KEY='dev')
-    #     DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    # )
-    # app.config['MYSQL_HOST'] = 'localhost'
-    # app.config['MYSQL_USER'] = 'root'
-    # app.config['MYSQL_PASSWORD'] = 'fitsum_new'
-    # app.config['MYSQL_DB'] = 'flaskr'
-    # mysql = MySQL(app)
+    app.config['TESTING'] = False
+    app.config.update(
+        SECRET_KEY ='fitsum' ,
+        TESTING = True ,
+        DEBUG = True,
+        PROPAGATE_EXCEPTIONS = True,
+        TRAP_HTTP_EXCEPTIONS = True ,
+        TRAP_BAD_REQUEST_ERRORS = True
+    )
+    app.config['PERMANENT_SESSION_LIFETIME'] = 5
+    app.config['REMEMBER_COOKIE_DURATION']   = 60
+    login_manager = LoginManager(app)
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        cursor= mydb.cursor(dictionary=True)
+        cursor.execute('SELECT * FROM user WHERE id = %s ', (user_id ,))
+        user = cursor.fetchone()
+        cursor.close()
+
+        if user:
+            return User(user['id'] , user['username'])
+        else:
+            return None
+
+
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)

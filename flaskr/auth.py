@@ -4,11 +4,14 @@ from flask import \
      )
 from werkzeug.security import check_password_hash , generate_password_hash
 from flaskr.db import get_db
-from flaskr import mydb
+from flaskr import mydb , User
 from mysql.connector.errors import IntegrityError
+from flask_login import login_user , current_user , logout_user
+
 
 
 bp = Blueprint('auth' , __name__ , url_prefix='/auth')
+
 
 @bp.route('/register' , methods = ('GET' , 'POST'))
 def register():
@@ -50,6 +53,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        remember = bool(request.form.get('remember'))
         #db = get_db()
         cursor = mydb.cursor(dictionary=True)
         error = None
@@ -67,17 +71,22 @@ def login():
             error = 'Incorrect Password . '
 
         if error is None:
-            session.clear()
-            session['user_id'] = user['id']
+            # session.clear()
+            # session['user_id'] = user['id']
+            user = User(user['id'] , user['username'])
+            login_user(user , remember = remember)
             return redirect(url_for('index'))
 
         flash(error)
     return render_template('auth/login.html')
 
+
+
+
 @bp.before_app_request
 def load_logged_in_user():
-    user_id = session.get('user_id')
-
+    #user_id = session.get('user_id')
+    user_id = current_user.get_id()
     if user_id is None:
         g.user =None
     else:
@@ -92,7 +101,7 @@ def load_logged_in_user():
 
 @bp.route('/logout')
 def logout():
-    session.clear()
+    logout_user()
     return redirect(url_for('index'))
 
 def login_required(view):

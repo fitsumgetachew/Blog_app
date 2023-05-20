@@ -5,16 +5,34 @@
 {% endblock %}
 
 {% block content %}
+{% set now = datetime.datetime.now() %} {# Get the current time #}
+{% set five_hours_ago = now - datetime.timedelta(hours=5) %} {# Calculate the time 5 hours ago #}
+
+<h2>Recent messages:</h2>
+{% for comment in messages if comment['sent'] >= five_hours_ago %}
+ <article class="comment">
+     <header>
+         <div class="sender">  sent by {{ comment['senderUsername'] }} on {{comment['sent'].strftime('%Y-%m-%d')}} at {{comment['sent'].strftime('%H-%M-%S')}}</div>
+     </header>
+     {% autoescape true %}
+     <p class="message">{{ comment['message']|safe }}</p> {# Auto-escape the message content #}
+     {% endautoescape %}
+ </article>
+{% if not loop.last %}
+    <hr>
+{% endif %}
+{% endfor %}
+
+<h2>All messages:</h2>
 {% for comment in messages %}
  <article class="comment">
      <header>
-         <div class="sender"> sent by {{comment['senderUsername']}} </div>
+         <div class="sender"> sent by {{ comment['senderUsername'] }} on {{comment['sent'].strftime('%Y-%m-%d')}} at {{comment['sent'].strftime('%H-%M-%S')}}</div>
      </header>
-     <p class="message">{{comment['message']}}</p>
+     <p class="message">{{ comment['message'] |safe }}</p>
  </article>
 {% if not loop.last %}
     <hr>
 {% endif %}
 {% endfor %}
 {% endblock %}
-
